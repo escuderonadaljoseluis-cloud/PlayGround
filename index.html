@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0b0614">
+  <meta name="description" content="Meme Fight 3D — the internet's final boss battle. A pocket-sized 3D arena brawler for phones and tablets.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>MEME FIGHT 3D</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23ffd52e'/%3E%3Ctext x='32' y='46' font-family='Arial Black,Arial' font-size='34' font-weight='900' text-anchor='middle' fill='%23140f1e'%3EM%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-screen="loading">
+  <canvas id="scene" aria-label="3D meme fight arena"></canvas>
+  <div class="world-tint" aria-hidden="true"></div>
+  <div class="vignette" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
+  <div id="flash" aria-hidden="true"></div>
+
+  <!-- ============ TITLE ============ -->
+  <section id="screen-title" class="screen title-screen" hidden>
+    <header class="topbar">
+      <div class="brand-chip"><span class="brand-dot"></span> MEME DOME <span class="brand-season">S1</span></div>
+      <div class="topbar-right">
+        <span class="live-dot"></span> LIVE&nbsp;·&nbsp;12.4K&nbsp;VIEWERS
+      </div>
+    </header>
+
+    <div class="title-lockup">
+      <span class="sticker sticker-a">100% LOW POLY</span>
+      <span class="sticker sticker-b">NO CAP</span>
+      <h1 class="logo" aria-label="Meme Fight 3D">
+        <span class="logo-meme">MEME</span>
+        <span class="logo-fight">FIGHT</span>
+        <span class="logo-3d">3D</span>
+      </h1>
+      <p class="tagline">THE INTERNET'S FINAL BOSS BATTLE</p>
+    </div>
+
+    <div class="title-actions">
+      <button id="btn-play" class="btn btn-primary btn-jumbo" type="button">
+        <span class="btn-kicker">PRESS START, BESTIE</span>
+        TAP TO BRAWL
+      </button>
+      <div class="menu-row">
+        <button id="btn-how" class="btn btn-ghost" type="button">HOW TO PLAY</button>
+        <button id="btn-sound" class="btn btn-ghost btn-icon" type="button" aria-pressed="true"><span id="sound-icon">🔊</span><span id="sound-label">SOUND ON</span></button>
+      </div>
+    </div>
+
+    <footer class="title-foot">
+      <span>4 FIGHTERS</span><span class="foot-dot"></span><span>BEST OF 3</span><span class="foot-dot"></span><span>THUMB POWERED</span>
+    </footer>
+  </section>
+
+  <!-- ============ SELECT ============ -->
+  <section id="screen-select" class="screen select-screen" hidden>
+    <header class="select-top">
+      <button id="btn-back" class="btn btn-round" type="button" aria-label="Back to title">←</button>
+      <div class="select-heading">
+        <h2>PICK YOUR FIGHTER</h2>
+        <p>First to <b>2 rounds</b> wins the internet.</p>
+      </div>
+      <div class="opponent-chip">
+        <span class="chip-label">NEXT VICTIM</span>
+        <span id="opponent-name" class="chip-name">CHAD</span>
+        <button id="btn-shuffle" class="btn btn-mini" type="button" aria-label="Random opponent">⟳</button>
+      </div>
+    </header>
+
+    <aside id="fighter-info" class="fighter-info glass">
+      <div class="fighter-name-row">
+        <h3 id="fighter-name">DOGEY</h3>
+        <span id="fighter-role" class="role-tag">THE GOOD BOI</span>
+      </div>
+      <p id="fighter-tagline" class="fighter-tagline">Much damage. Very punch. Wow.</p>
+      <div class="stats">
+        <div class="stat"><span>PWR</span><div class="stat-track"><i id="stat-pow"></i></div></div>
+        <div class="stat"><span>SPD</span><div class="stat-track"><i id="stat-spd"></i></div></div>
+        <div class="stat"><span>DEF</span><div class="stat-track"><i id="stat-def"></i></div></div>
+        <div class="stat"><span>RCH</span><div class="stat-track"><i id="stat-rch"></i></div></div>
+      </div>
+      <div class="special-card">
+        <span class="special-label">SPECIAL MOVE</span>
+        <b id="fighter-special">MUCH WOW</b>
+        <p id="fighter-special-desc">A five-hit golden rush. Very combo.</p>
+      </div>
+    </aside>
+
+    <div id="roster" class="roster" role="listbox" aria-label="Fighter roster"></div>
+
+    <button id="btn-fight" class="btn btn-primary btn-fight" type="button">
+      <span class="btn-kicker">LOCKED &amp; LOADED</span>
+      FIGHT!
+    </button>
+
+    <p class="select-hint">TAP A CARD · SWIPE ARENA TO PEEK AROUND</p>
+  </section>
+
+  <!-- ============ HUD ============ -->
+  <div id="hud" class="hud" hidden>
+    <div class="hud-top">
+      <div class="fighter-hud fighter-hud-player">
+        <div class="portrait-wrap"><div id="portrait-player" class="portrait"></div></div>
+        <div class="hud-bars">
+          <div class="hud-name-row"><span id="name-player">DOGEY</span><span id="hp-player-text" class="hp-text">100</span></div>
+          <div class="hp-shell">
+            <div id="hp-player-ghost" class="hp-ghost"></div>
+            <div id="hp-player" class="hp-fill"></div>
+          </div>
+          <div class="meter-shell"><div id="meter-player" class="meter-fill"></div><span class="meter-label">SPECIAL</span></div>
+        </div>
+        <div id="pips-player" class="pips"><i></i><i></i></div>
+      </div>
+
+      <div class="round-box">
+        <div id="round-label" class="round-label">ROUND 1</div>
+        <div id="timer" class="timer">60</div>
+        <div class="round-sub">MEME DOME</div>
+      </div>
+
+      <div class="fighter-hud fighter-hud-enemy">
+        <div id="pips-enemy" class="pips"><i></i><i></i></div>
+        <div class="hud-bars">
+          <div class="hud-name-row"><span id="hp-enemy-text" class="hp-text">100</span><span id="name-enemy">CHAD</span></div>
+          <div class="hp-shell hp-shell-enemy">
+            <div id="hp-enemy-ghost" class="hp-ghost"></div>
+            <div id="hp-enemy" class="hp-fill"></div>
+          </div>
+          <div class="meter-shell meter-shell-enemy"><div id="meter-enemy" class="meter-fill"></div><span class="meter-label">SPECIAL</span></div>
+        </div>
+        <div class="portrait-wrap"><div id="portrait-enemy" class="portrait"></div></div>
+      </div>
+    </div>
+
+    <button id="btn-pause" class="btn btn-round btn-pause" type="button" aria-label="Pause game">❚❚</button>
+
+    <div id="combo" class="combo" aria-live="polite">
+      <span id="combo-count" class="combo-count">3</span><span class="combo-x">×</span>
+      <span id="combo-label" class="combo-label">COMBO</span>
+    </div>
+
+    <div id="announcer" class="announcer" aria-live="assertive"><div class="announce-inner"></div><div class="announce-shadow"></div></div>
+    <div id="toast" class="toast" aria-live="polite"></div>
+
+    <div id="hint" class="hint">WASD / DRAG TO MOVE&nbsp; · &nbsp;J PUNCH&nbsp; · &nbsp;K KICK&nbsp; · &nbsp;L BLOCK&nbsp; · &nbsp;SPACE JUMP&nbsp; · &nbsp;U SPECIAL</div>
+  </div>
+
+  <!-- ============ TOUCH CONTROLS ============ -->
+  <div id="touch-controls" class="touch-controls" hidden>
+    <div id="stick-zone" class="stick-zone" aria-label="Movement joystick">
+      <div id="stick-base" class="stick-base">
+        <div class="stick-ring"></div>
+        <div id="stick-knob" class="stick-knob"><span></span></div>
+      </div>
+      <span class="stick-caption">DRAG TO MOVE</span>
+    </div>
+
+    <div class="actions">
+      <button class="btn action-btn action-block" data-action="block" type="button"><span class="act-glyph">🛡</span><span class="act-name">BLOCK</span></button>
+      <button class="btn action-btn action-jump" data-action="jump" type="button"><span class="act-glyph">↑</span><span class="act-name">JUMP</span></button>
+      <button class="btn action-btn action-kick" data-action="kick" type="button"><span class="act-glyph">🦵</span><span class="act-name">KICK</span></button>
+      <button id="btn-special" class="btn action-btn action-special" data-action="special" type="button"><span class="special-fill"></span><span class="act-glyph">★</span><span class="act-name">SPECIAL</span></button>
+      <button class="btn action-btn action-punch" data-action="punch" type="button"><span class="act-glyph">👊</span><span class="act-name">PUNCH</span></button>
+    </div>
+  </div>
+
+  <!-- ============ HOW TO PLAY ============ -->
+  <div id="screen-how" class="overlay" hidden>
+    <div class="panel panel-how">
+      <button class="btn btn-close" data-close="how" type="button" aria-label="Close">✕</button>
+      <span class="panel-kicker">THE SCHOOL OF HARD KNOCKS</span>
+      <h2>HOW TO <span>FIGHT</span></h2>
+      <div class="how-grid">
+        <div class="how-item"><div class="how-icon">🕹</div><b>MOVE</b><p>Drag the left stick. Or use WASD / arrow keys. On desktop, click-drag the arena too.</p></div>
+        <div class="how-item"><div class="how-icon">👊</div><b>PUNCH</b><p>Tap PUNCH (or J) three times to chain a combo. Third hit sends them flying.</p></div>
+        <div class="how-item"><div class="how-icon">🦵</div><b>KICK</b><p>Slower, longer reach, bigger knockback. Tap KICK or K. Great for closing space.</p></div>
+        <div class="how-item"><div class="how-icon">🛡</div><b>BLOCK</b><p>Hold BLOCK (or L) to eat 80% less damage. You still take chip damage — and gain meter.</p></div>
+        <div class="how-item"><div class="how-icon">★</div><b>SPECIAL</b><p>Fill the SPECIAL meter, then unleash your meme's signature move. Tap ★ or U.</p></div>
+        <div class="how-item"><div class="how-icon">🏆</div><b>WIN</b><p>Beat your rival in 2 of 3 rounds. K.O. or highest health when the clock hits zero.</p></div>
+      </div>
+      <p class="panel-foot">Pro tip: block a punch, then immediately combo back. Works every time. (Not every time.)</p>
+      <button class="btn btn-primary btn-wide" data-close="how" type="button">GOT IT</button>
+    </div>
+  </div>
+
+  <!-- ============ PAUSE ============ -->
+  <div id="screen-pause" class="overlay" hidden>
+    <div class="panel panel-pause">
+      <span class="panel-kicker">BRB, LOSING</span>
+      <h2>PAUSED</h2>
+      <p class="pause-copy">The memes will wait. They have nowhere else to be.</p>
+      <div class="pause-actions">
+        <button id="btn-resume" class="btn btn-primary" type="button">RESUME</button>
+        <button id="btn-restart" class="btn btn-ghost" type="button">RESTART MATCH</button>
+        <button id="btn-quit" class="btn btn-ghost" type="button">QUIT TO MENU</button>
+      </div>
+      <div class="pause-sound"><button id="btn-sound-pause" class="btn btn-ghost btn-icon" type="button"><span>🔊</span><span>SOUND</span></button></div>
+    </div>
+  </div>
+
+  <!-- ============ RESULT ============ -->
+  <div id="screen-result" class="overlay" hidden>
+    <div class="panel panel-result">
+      <div id="result-confetti" class="result-confetti" aria-hidden="true"></div>
+      <span id="result-badge" class="result-badge">W</span>
+      <span class="panel-kicker" id="result-kicker">THE INTERNET HAS SPOKEN</span>
+      <h2 id="result-title">VICTORY!</h2>
+      <p id="result-sub" class="result-sub">You did the thing. The crowd goes mild. (They're cheering, actually.)</p>
+      <div id="result-stats" class="result-stats"></div>
+      <div class="result-actions">
+        <button id="btn-rematch" class="btn btn-primary" type="button">REMATCH</button>
+        <button id="btn-change" class="btn btn-ghost" type="button">CHANGE FIGHTER</button>
+      </div>
+      <p class="panel-foot">No memes were harmed in the making of this game. Probably.</p>
+    </div>
+  </div>
+
+  <!-- ============ LOADING ============ -->
+  <div id="screen-loading" class="loading-screen">
+    <div class="loading-lockup">
+      <div class="loading-badge">MF<span>3D</span></div>
+      <h2>LOADING MEMES<span class="dots"><i>.</i><i>.</i><i>.</i></span></h2>
+      <div class="loading-track"><div id="loading-bar" class="loading-bar"></div></div>
+      <p id="loading-tip">Warming up the algorithm...</p>
+    </div>
+  </div>
+
+  <noscript><div class="noscript">This game needs JavaScript. Even the memes are scripted.</div></noscript>
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
